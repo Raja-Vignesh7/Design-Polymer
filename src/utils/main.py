@@ -48,6 +48,6 @@ class Models:
             "Density": Density_pred
         }
         
-ip = "*CC(*)c1ccccc1C(=O)OCCCCCC"  # Benzene
-model = Models()
-print(model.predict_properties(ip))
+# ip = "*CC(*)c1ccccc1C(=O)OCCCCCC"  # Benzene
+# model = Models()
+# print(model.predict_properties(ip))
