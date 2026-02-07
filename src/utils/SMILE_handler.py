@@ -170,7 +170,17 @@ def get_smile_features(smile, nBits=1800):
                 arr.append(0)
         
         # Convert list to numpy array for efficient computation
-        return np.array(arr)
+        result = np.array(arr)
+        
+        # Pad or truncate to match expected nBits size
+        if len(result) < nBits:
+            # Pad with zeros if we have fewer features than expected
+            result = np.pad(result, (0, nBits - len(result)), mode='constant', constant_values=0)
+        elif len(result) > nBits:
+            # Truncate if we have more features than expected
+            result = result[:nBits]
+        
+        return result
         
     except Exception as e:
         # Catch-all error handling: log exception and return zero vector
