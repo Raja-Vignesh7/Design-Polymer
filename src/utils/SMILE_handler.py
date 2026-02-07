@@ -104,27 +104,27 @@ def draw_smile_2D(smile):
     return img, canon_smiles
 
 
-def get_smile_features(smile, nBits=1800):
+def get_smile_features(smile, nBits=1613):
     """
     Extracts molecular descriptors from a SMILES string and returns them as a feature vector.
     
-    This function calculates 1800+ molecular descriptors using Mordred, which includes
+    This function calculates ~1613 molecular descriptors using Mordred, which includes
     topological, geometric, and physicochemical properties. Invalid values are replaced with 0.
     
     Args:
         smile (str): SMILES string representing a molecular structure
-        nBits (int): Expected number of features/descriptors (default: 1800)
+        nBits (int): Expected number of features/descriptors (default: 1613)
                     Used as array size for invalid SMILES
         
     Returns:
         numpy.ndarray: 1D numpy array of molecular features/descriptors
-                      - Shape: (1800,) by default
+                      - Shape: (1613,) by default
                       - Returns array of zeros if SMILES is invalid or feature extraction fails
                       - Non-numeric or invalid descriptor values are converted to 0.0
             
     Example:
         >>> features = get_smile_features("C1=CC=CC=C1")  # Benzene
-        >>> print(features.shape)  # (1800,)
+        >>> print(features.shape)  # (1613,)
         >>> print(features[:5])  # First 5 features
         
     Notes:
@@ -172,14 +172,8 @@ def get_smile_features(smile, nBits=1800):
         # Convert list to numpy array for efficient computation
         result = np.array(arr)
         
-        # Pad or truncate to match expected nBits size
-        if len(result) < nBits:
-            # Pad with zeros if we have fewer features than expected
-            result = np.pad(result, (0, nBits - len(result)), mode='constant', constant_values=0)
-        elif len(result) > nBits:
-            # Truncate if we have more features than expected
-            result = result[:nBits]
-        
+        # Return the actual features (no padding/truncation)
+        # Mordred typically returns ~1613 features which matches trained models
         return result
         
     except Exception as e:
