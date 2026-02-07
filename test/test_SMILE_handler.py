@@ -119,7 +119,7 @@ class TestGetSmileFeatures(unittest.TestCase):
         
         self.assertIsInstance(features, np.ndarray)
         self.assertEqual(features.ndim, 1)
-        self.assertEqual(features.shape[0], 1800)
+        self.assertEqual(features.shape[0], 1613)
     
     def test_invalid_smile_returns_zero_array(self):
         """Test that invalid SMILES returns zero array."""
@@ -128,7 +128,7 @@ class TestGetSmileFeatures(unittest.TestCase):
         
         self.assertIsInstance(features, np.ndarray)
         self.assertTrue(np.all(features == 0))
-        self.assertEqual(features.shape[0], 1800)
+        self.assertEqual(features.shape[0], 1613)
     
     def test_custom_nbits_parameter(self):
         """Test custom nBits parameter."""
@@ -187,7 +187,7 @@ class TestSmileHandlerIntegration(unittest.TestCase):
         
         # Test features
         features = get_smile_features(smile)
-        self.assertEqual(features.shape[0], 1800)
+        self.assertEqual(features.shape[0], 1613)
     
     def test_workflow_invalid_smile(self):
         """Test complete workflow with invalid SMILES."""

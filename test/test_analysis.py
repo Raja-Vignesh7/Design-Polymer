@@ -103,15 +103,15 @@ class TestAnalyserGet(unittest.TestCase):
         self.analyser = Analyser(["CCO", "C1=CC=CC=C1", "CCC"])
     
     def test_get_returns_tuple(self):
-        """Test that get() returns a tuple of (plots, sorted_smiles)."""
+        """Test that get() returns a tuple of (plots, sorted_results)."""
         with patch('analysis.plt.subplots') as mock_subplots:
             mock_fig = MagicMock()
             mock_ax = MagicMock()
             mock_subplots.return_value = (mock_fig, mock_ax)
-            plots, sorted_smiles = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+            plots, sorted_results = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
             
             self.assertIsInstance(plots, dict)
-            self.assertIsInstance(sorted_smiles, list)
+            self.assertIsInstance(sorted_results, list)
     
     def test_get_returns_plots_dict(self):
         """Test that plots dictionary contains all properties."""
@@ -127,19 +127,25 @@ class TestAnalyserGet(unittest.TestCase):
                 self.assertIn(prop, plots)
     
     def test_get_returns_sorted_smiles(self):
-        """Test that SMILES are sorted by primary priority."""
+        """Test that sorted_results contains SMILES and properties."""
         with patch('analysis.plt.subplots') as mock_subplots:
             mock_fig = MagicMock()
             mock_ax = MagicMock()
             mock_subplots.return_value = (mock_fig, mock_ax)
-            plots, sorted_smiles = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+            plots, sorted_results = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
             
-            # Should return 3 SMILES (same as input)
-            self.assertEqual(len(sorted_smiles), 3)
+            # Should return 3 results (same as input)
+            self.assertEqual(len(sorted_results), 3)
             
-            # Should return list of strings
-            for smi in sorted_smiles:
-                self.assertIsInstance(smi, str)
+            # Should return list of dicts
+            for result in sorted_results:
+                self.assertIsInstance(result, dict)
+                self.assertIn('SMILES', result)
+                self.assertIn('Tg', result)
+                self.assertIn('Tc', result)
+                self.assertIn('Rg', result)
+                self.assertIn('FFV', result)
+                self.assertIn('Density', result)
     
     def test_sorting_by_primary_property(self):
         """Test that sorting is done by first property in priority_order."""
@@ -148,10 +154,13 @@ class TestAnalyserGet(unittest.TestCase):
             mock_ax = MagicMock()
             mock_subplots.return_value = (mock_fig, mock_ax)
             # Sort by Tg (should be: 180, 150, 120)
-            _, sorted_smiles = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+            _, sorted_results = self.analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
             
-            # Verify order (high Tg first)
-            self.assertEqual(len(sorted_smiles), 3)
+            # Verify results contain Tg values in descending order
+            self.assertEqual(len(sorted_results), 3)
+            tg_values = [result['Tg'] for result in sorted_results]
+            # Check that values are sorted in descending order (higher values first)
+            self.assertEqual(tg_values, sorted(tg_values, reverse=True))
     
     def test_empty_data_handling(self):
         """Test handling of empty or invalid data."""
@@ -163,10 +172,10 @@ class TestAnalyserGet(unittest.TestCase):
                     mock_fig = MagicMock()
                     mock_ax = MagicMock()
                     mock_subplots.return_value = (mock_fig, mock_ax)
-                    plots, sorted_smiles = empty_analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+                    plots, sorted_results = empty_analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
                     
                     self.assertEqual(len(plots), 0)
-                    self.assertEqual(len(sorted_smiles), 0)
+                    self.assertEqual(len(sorted_results), 0)
     
     def test_plots_have_figure_attributes(self):
         """Test that returned plots are matplotlib figures."""
@@ -213,9 +222,14 @@ class TestAnalyserPriorityOrdering(unittest.TestCase):
             analyser2 = Analyser(["CCO", "C1=CC=CC=C1", "CCC"])
             _, sorted_by_tc = analyser2.get(["Tc", "Tg", "Rg", "FFV", "Density"])
             
-            # Results should be comparable lists
+            # Results should contain dicts with SMILES and properties
             self.assertEqual(len(sorted_by_tg), 3)
             self.assertEqual(len(sorted_by_tc), 3)
+            
+            # All results should be dicts
+            for result in sorted_by_tg + sorted_by_tc:
+                self.assertIsInstance(result, dict)
+                self.assertIn('SMILES', result)
 
 
 class TestAnalyserIntegration(unittest.TestCase):
@@ -247,11 +261,18 @@ class TestAnalyserIntegration(unittest.TestCase):
             mock_ax = MagicMock()
             mock_subplots.return_value = (mock_fig, mock_ax)
             # Get analysis
-            plots, sorted_smiles = analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+            plots, sorted_results = analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
             
             # Verify results
             self.assertEqual(len(plots), 5)  # 5 properties
-            self.assertEqual(len(sorted_smiles), 2)  # 2 SMILES
+            self.assertEqual(len(sorted_results), 2)  # 2 compounds
+            
+            # Verify results contain SMILES and properties
+            for result in sorted_results:
+                self.assertIsInstance(result, dict)
+                self.assertIn('SMILES', result)
+                self.assertIn('Tg', result)
+                self.assertIn('Density', result)
 
 
 if __name__ == '__main__':

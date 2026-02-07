@@ -131,7 +131,7 @@ class TestModels(unittest.TestCase):
         """Test predict_properties with single SMILES string."""
         import numpy as np
         
-        mock_features.return_value = np.random.rand(1800)
+        mock_features.return_value = np.random.rand(1613)
         
         with patch('main.joblib.load') as mock_joblib:
             mock_model = MagicMock()
@@ -155,7 +155,7 @@ class TestModels(unittest.TestCase):
         """Test predict_properties with list of SMILES strings."""
         import numpy as np
         
-        mock_features.return_value = np.random.rand(1800)
+        mock_features.return_value = np.random.rand(1613)
         
         with patch('main.joblib.load') as mock_joblib:
             mock_model = MagicMock()
@@ -184,7 +184,7 @@ class TestModels(unittest.TestCase):
         """Test that predictions return float values."""
         import numpy as np
         
-        mock_features.return_value = np.random.rand(1800)
+        mock_features.return_value = np.random.rand(1613)
         
         with patch('main.joblib.load') as mock_joblib:
             mock_model = MagicMock()
@@ -203,7 +203,7 @@ class TestModels(unittest.TestCase):
         """Test that predict_properties calls all 5 models."""
         import numpy as np
         
-        mock_features.return_value = np.random.rand(1800)
+        mock_features.return_value = np.random.rand(1613)
         
         with patch('main.joblib.load') as mock_joblib:
             mock_model = MagicMock()
@@ -230,7 +230,7 @@ class TestModelsIntegration(unittest.TestCase):
         """Test complete prediction workflow."""
         import numpy as np
         
-        mock_features.return_value = np.random.rand(1800)
+        mock_features.return_value = np.random.rand(1613)
         
         # Create a mock that returns correct number of predictions
         mock_model = MagicMock()
