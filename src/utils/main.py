@@ -23,7 +23,7 @@ class db_config_info:
         Creates the file if it doesn't exist.
         """
         load_dotenv()
-        self.FILE_PATH = 'src\\utils\\.env'
+        self.FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
         
         # Create .env file if it doesn't exist
         if not os.path.exists(self.FILE_PATH):
@@ -105,22 +105,30 @@ class Models:
             FileNotFoundError: If any model file is not found at the specified path
         """
         # Define model directory path relative to current script location
-        model_dir = os.path.join('..', 'models')
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        models_dir = os.path.join(current_dir, '..', 'models')
+        
+        # Build absolute paths for all model files
+        tg_path = os.path.join(models_dir, 'Tg_model.joblib')
+        tc_path = os.path.join(models_dir, 'Tc_model.joblib')
+        rg_path = os.path.join(models_dir, 'Rg_model.joblib')
+        ffv_path = os.path.join(models_dir, 'FFV_model.joblib')
+        density_path = os.path.join(models_dir, 'Density_model.joblib')
         
         # Load pre-trained Tg (Glass Transition Temperature) model
-        self.tg_model = joblib.load( 'src\\models\\Tg_model.joblib')
+        self.tg_model = joblib.load(tg_path)
         
         # Load pre-trained Tc (Thermal Conductivity) model
-        self.Tc_model = joblib.load( 'src\\models\\Tc_model.joblib')
+        self.Tc_model = joblib.load(tc_path)
         
         # Load pre-trained Rg (Radius of Gyration) model
-        self.Rg_model = joblib.load( 'src\\models\\Rg_model.joblib')
+        self.Rg_model = joblib.load(rg_path)
         
         # Load pre-trained FFV (Fractional Free Volume) model
-        self.FFV_model = joblib.load( 'src\\models\\FFV_model.joblib')
+        self.FFV_model = joblib.load(ffv_path)
         
         # Load pre-trained Density model
-        self.Density_model = joblib.load( 'src\\models\\Density_model.joblib')
+        self.Density_model = joblib.load(density_path)
         
     def predict_properties(self, smile):
         """
