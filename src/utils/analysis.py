@@ -46,15 +46,16 @@ class Analyser:
                                   
         Example:
             >>> analyser = Analyser(["CCO", "C1=CC=CC=C1", "CCC"])
-            >>> plots, sorted_smiles = analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
+            >>> plots, sorted_results = analyser.get(["Tg", "Tc", "Rg", "FFV", "Density"])
             >>> # plots is a dict of matplotlib figures
-            >>> # sorted_smiles is a list of SMILES sorted by Tg (descending)
+            >>> # sorted_results is a list of dicts with SMILES and properties
             
         Returns:
-            tuple: (plots_dict, sorted_smiles)
+            tuple: (plots_dict, sorted_results)
                 - plots_dict (dict): Dictionary with property names as keys and 
                                     matplotlib Figure objects as values
-                - sorted_smiles (list): List of SMILES sorted by priority order
+                - sorted_results (list): List of dicts containing SMILES and all predicted properties,
+                                        sorted by priority order
                 
         Notes:
             - Sorts by the first property in priority_order (primary sort key)
@@ -73,8 +74,8 @@ class Analyser:
         for property in priority_order[::-1]:
             df = df.sort_values(by=property, ascending=False).reset_index(drop=True)
         
-        # Get sorted SMILES list
-        sorted_smiles = df['SMILES'].tolist()
+        # Get sorted results with properties
+        sorted_results = df.to_dict('records')
         
         # Create bar plots for each target property
         plots = {}
@@ -116,7 +117,7 @@ class Analyser:
         print(f"\n✓ Analysis Complete!")
         print(f"✓ Generated {len(plots)} plot(s) for properties: {', '.join(plots.keys())}")
         print(f"✓ SMILES sorted by primary priority: {priority_order}")
-        print(f"✓ Total valid SMILES analyzed: {len(sorted_smiles)}")
+        print(f"✓ Total valid SMILES analyzed: {len(sorted_results)}")
         
-        return plots, sorted_smiles
+        return plots, sorted_results
         
