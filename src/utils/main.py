@@ -124,32 +124,70 @@ class Models:
         
     def predict_properties(self, smile):
         """
-        Predict all polymer properties from a SMILES string.
+        Predict all polymer properties from SMILES string(s).
         
-        This method extracts molecular features from the input SMILES string and
+        This method extracts molecular features from the input SMILES string(s) and
         uses the pre-trained models to predict multiple polymer properties in one call.
         
         Args:
-            smile (str): SMILES string representing a polymer fragment or molecule
+            smile (str or list): SMILES string(s) representing polymer fragment(s).
+                                Can be a single string or list of strings.
             
         Returns:
-            dict: Dictionary containing predicted properties with keys:
-                  - "Tg" (float): Predicted glass transition temperature
-                  - "Tc" (float): Predicted thermal conductivity
-                  - "Rg" (float): Predicted radius of gyration
-                  - "FFV" (float): Predicted fractional free volume
-                  - "Density" (float): Predicted polymer density
+            dict or list: If input is a single SMILES string, returns a dictionary 
+                         containing predicted properties. If input is a list, returns 
+                         a list of dictionaries for each SMILES.
+                         
+                         Dictionary keys:
+                         - "Tg" (float): Predicted glass transition temperature
+                         - "Tc" (float): Predicted thermal conductivity
+                         - "Rg" (float): Predicted radius of gyration
+                         - "FFV" (float): Predicted fractional free volume
+                         - "Density" (float): Predicted polymer density
                   
         Example:
             >>> models = Models()
+            >>> # Single SMILES
             >>> predictions = models.predict_properties("CCO")
             >>> print(f"Predicted Tg: {predictions['Tg']}")
+            >>> 
+            >>> # Multiple SMILES
+            >>> predictions = models.predict_properties(["CCO", "C1=CC=CC=C1"])
+            >>> for pred in predictions:
+            ...     print(f"Predicted Tg: {pred['Tg']}")
             
         Notes:
             - Feature extraction uses Mordred descriptors (1800 features)
             - All models expect the same feature vector format
             - Returns single float values (not arrays)
+            - Batch processing for lists is more efficient than individual calls
         """
+        # Check if input is a list of SMILES strings
+        if isinstance(smile, list):
+            # Extract features for all SMILES strings
+            features_list = [get_smile_features(smi) for smi in smile]
+            features_array = np.array(features_list)
+            
+            # Predict all properties for all SMILES at once (batch prediction)
+            tg_preds = self.tg_model.predict(features_array)
+            Tc_preds = self.Tc_model.predict(features_array)
+            Rg_preds = self.Rg_model.predict(features_array)
+            FFV_preds = self.FFV_model.predict(features_array)
+            Density_preds = self.Density_model.predict(features_array)
+            
+            # Format results as list of dictionaries
+            results = []
+            for i in range(len(smile)):
+                results.append({
+                    "Tg": float(tg_preds[i]),
+                    "Tc": float(Tc_preds[i]),
+                    "Rg": float(Rg_preds[i]),
+                    "FFV": float(FFV_preds[i]),
+                    "Density": float(Density_preds[i])
+                })
+            return results
+        
+        # Handle single SMILES string
         # Extract molecular features from SMILES using Mordred descriptors
         features = get_smile_features(smile)
         
