@@ -1,4 +1,6 @@
 src/utils/__pycache__/
+__pycache__/
 src/models/
 temp.py
 .env
+test_analysis_validation.py
