@@ -104,7 +104,7 @@ def draw_smile_2D(smile):
     return img, canon_smiles
 
 
-def get_smile_features(smile, nBits=1613):
+def get_smile_features(smile,as_dict=False, nBits=1613):
     """
     Extracts molecular descriptors from a SMILES string and returns them as a feature vector.
     
@@ -152,7 +152,13 @@ def get_smile_features(smile, nBits=1613):
         # Convert descriptor object to dictionary format
         # Keys are descriptor names, values are descriptor values
         mordred_df = mordred_desc.asdict()
-        
+        if as_dict:
+            for key in mordred_df:
+                try:
+                    mordred_df[key] = float(mordred_df[key])
+                except (ValueError, TypeError):
+                    mordred_df[key] = 0.0
+            return mordred_df
         # Initialize list to store feature values
         arr = []
         

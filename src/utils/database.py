@@ -137,11 +137,40 @@ class DatabaseHandler:
         Returns:
             bool: True if data saved successfully
         """
+        import numpy as np
+        
         query = """
         INSERT INTO Polymer_data (SMILES, features, Tg, FFV, Density, Tc, Rg)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        features_json = json.dumps(features) if isinstance(features, dict) else features
+        
+        # Sanitize features to handle inf/NaN values that aren't JSON-serializable
+        def sanitize_value(val):
+            """Convert inf and NaN to None (null in JSON)"""
+            if isinstance(val, dict):
+                return {k: sanitize_value(v) for k, v in val.items()}
+            elif isinstance(val, (list, tuple)):
+                return [sanitize_value(v) for v in val]
+            elif isinstance(val, (float, np.floating)):
+                if np.isinf(val) or np.isnan(val):
+                    return float(0)  # Replace inf/NaN with 0 for JSON serialization
+                return float(val)
+            return val
+        
+        # Convert features to JSON-serializable format
+        if isinstance(features, dict):
+            features_clean = sanitize_value(features)
+            features_json = json.dumps(features_clean)
+        else:
+            # Handle numpy arrays and lists
+            if isinstance(features, np.ndarray):
+                features_clean = sanitize_value(features.tolist())
+            elif isinstance(features, (list, tuple)):
+                features_clean = sanitize_value(list(features))
+            else:
+                features_clean = sanitize_value(features)
+            features_json = json.dumps(features_clean)
+        
         params = (smiles, features_json, tg, ffv, density, tc, rg)
         return self.execute_query(query, params)
     

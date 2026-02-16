@@ -74,7 +74,6 @@ def save_analyzer_results(container, results):
         # Load database configuration
         config_manager = db_config_info()
         config = config_manager.get_config_info()
-        
         # Initialize database handler
         handler = DatabaseHandler(
             host=config.get("DB_HOST", "localhost"),
@@ -99,10 +98,8 @@ def save_analyzer_results(container, results):
                     smiles = result.get("SMILES", "")
                     
                     # Extract features for this SMILES if not already present
-                    if "features" in result:
-                        features = result.get("features", {})
-                    else:
-                        features = get_smile_features(smiles)
+                    
+                    features = get_smile_features(smiles, as_dict=True)
                     
                     success = handler.save_polymer_data(
                         smiles=smiles,
@@ -119,6 +116,7 @@ def save_analyzer_results(container, results):
                     else:
                         failed_count += 1
                 except Exception as row_error:
+                    container.warning(f"⚠ Failed to save record for SMILES: {smiles}. Error: {str(row_error)}")
                     failed_count += 1
         
         # Disconnect from database
@@ -342,7 +340,7 @@ def render_settings(col2):
             password = st.text_input("Password:", type="password", placeholder="MySQL password")
         
         with col_b:
-            db_name = st.text_input("Database Name:", value="polymer_db", placeholder="Database name")
+            db_name = st.text_input("Database Name:", placeholder="Database name")
             port = st.number_input("Port:", value=3306, min_value=1, max_value=65535)
         
         # Save button
