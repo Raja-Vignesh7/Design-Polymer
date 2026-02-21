@@ -141,7 +141,16 @@ def initialize_session_state():
 
 def render_menu(col1):
     """Render the menu options in column 1."""
-    st.session_state.current_menu = col1.radio(
+    # st.session_state.current_menu = col1.radio(
+    #     "Select Menu Option:",
+    #     options=[
+    #         "Get Properties",
+    #         "Analyzer",
+    #         "Settings"
+    #     ],
+    #     index=0
+    # )
+    st.session_state.current_menu = col1.selectbox(
         "Select Menu Option:",
         options=[
             "Get Properties",
