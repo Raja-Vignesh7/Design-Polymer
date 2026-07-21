@@ -4,3 +4,4 @@ models/
 .env
 temp.py
 test_analysis_validation.py
+.vscode/
