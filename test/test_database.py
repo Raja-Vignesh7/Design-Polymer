@@ -2,14 +2,14 @@
 Unit tests for database.py module.
 
 Tests the following classes:
-- DatabaseHandler: MySQL database operations
+- DatabaseHandler: SQLite database operations
 """
 
-import unittest
-import sys
 import os
-from unittest.mock import patch, MagicMock, call
-import mysql.connector
+import sqlite3
+import sys
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add src/utils to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'utils'))
@@ -70,7 +70,7 @@ class TestDatabaseHandlerInitialization(unittest.TestCase):
 class TestDatabaseHandlerConnection(unittest.TestCase):
     """Test cases for database connection methods."""
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_connect_success(self, mock_connect):
         """Test successful database connection."""
         mock_connection = MagicMock()
@@ -89,10 +89,10 @@ class TestDatabaseHandlerConnection(unittest.TestCase):
         self.assertEqual(handler.connection, mock_connection)
         mock_connect.assert_called_once()
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_connect_failure(self, mock_connect):
         """Test failed database connection."""
-        mock_connect.side_effect = mysql.connector.Error("Connection failed")
+        mock_connect.side_effect = sqlite3.Error("Connection failed")
         
         handler = DatabaseHandler(
             host='localhost',
@@ -106,7 +106,7 @@ class TestDatabaseHandlerConnection(unittest.TestCase):
         self.assertFalse(result)
         self.assertIsNone(handler.connection)
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_disconnect_success(self, mock_connect):
         """Test successful database disconnection."""
         mock_connection = MagicMock()
@@ -125,7 +125,7 @@ class TestDatabaseHandlerConnection(unittest.TestCase):
         self.assertTrue(result)
         mock_connection.close.assert_called_once()
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_disconnect_without_connection(self, mock_connect):
         """Test disconnect when no connection exists."""
         handler = DatabaseHandler(
@@ -144,7 +144,7 @@ class TestDatabaseHandlerConnection(unittest.TestCase):
 class TestDatabaseHandlerQueries(unittest.TestCase):
     """Test cases for database query methods."""
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def setUp(self, mock_connect):
         """Set up test fixtures."""
         self.mock_connection = MagicMock()
@@ -176,6 +176,7 @@ class TestDatabaseHandlerQueries(unittest.TestCase):
     def test_execute_query_insert(self):
         """Test executing an INSERT query."""
         query = "INSERT INTO polymers (smiles, tg) VALUES ('CCO', 100.5)"
+        self.mock_connection.commit.reset_mock()
         self.handler.execute_query(query)
         
         self.mock_cursor.execute.assert_called_once_with(query)
@@ -184,6 +185,7 @@ class TestDatabaseHandlerQueries(unittest.TestCase):
     def test_execute_query_update(self):
         """Test executing an UPDATE query."""
         query = "UPDATE polymers SET tg = 110.5 WHERE id = 1"
+        self.mock_connection.commit.reset_mock()
         self.handler.execute_query(query)
         
         self.mock_cursor.execute.assert_called_once_with(query)
@@ -192,6 +194,7 @@ class TestDatabaseHandlerQueries(unittest.TestCase):
     def test_execute_query_delete(self):
         """Test executing a DELETE query."""
         query = "DELETE FROM polymers WHERE id = 1"
+        self.mock_connection.commit.reset_mock()
         self.handler.execute_query(query)
         
         self.mock_cursor.execute.assert_called_once_with(query)
@@ -199,7 +202,7 @@ class TestDatabaseHandlerQueries(unittest.TestCase):
     
     def test_execute_query_with_exception(self):
         """Test query execution with error handling."""
-        self.mock_cursor.execute.side_effect = mysql.connector.Error("Query error")
+        self.mock_cursor.execute.side_effect = sqlite3.Error("Query error")
         
         query = "SELECT * FROM invalid_table"
         result = self.handler.execute_query(query)
@@ -211,7 +214,7 @@ class TestDatabaseHandlerQueries(unittest.TestCase):
 class TestDatabaseHandlerTableOperations(unittest.TestCase):
     """Test cases for table-related operations."""
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_table_exists(self, mock_connect):
         """Test checking if table exists."""
         mock_connection = MagicMock()
@@ -232,7 +235,7 @@ class TestDatabaseHandlerTableOperations(unittest.TestCase):
         # Just verify the handler can be used
         self.assertIsNotNone(handler)
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_get_table_schema(self, mock_connect):
         """Test retrieving table schema information."""
         mock_connection = MagicMock()
@@ -255,7 +258,7 @@ class TestDatabaseHandlerTableOperations(unittest.TestCase):
 class TestDatabaseHandlerIntegration(unittest.TestCase):
     """Integration tests for DatabaseHandler."""
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_connection_workflow(self, mock_connect):
         """Test complete connection workflow."""
         mock_connection = MagicMock()
@@ -278,7 +281,7 @@ class TestDatabaseHandlerIntegration(unittest.TestCase):
         self.assertTrue(handler.disconnect())
         mock_connection.close.assert_called_once()
     
-    @patch('database.mysql.connector.connect')
+    @patch('database.sqlite3.connect')
     def test_query_workflow(self, mock_connect):
         """Test complete query workflow."""
         mock_connection = MagicMock()
